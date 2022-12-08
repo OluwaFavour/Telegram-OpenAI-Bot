@@ -46,7 +46,7 @@ async def start(bot, message):
     caption = "Let's get started. How can I help you?"
     text_buttons = [
             [InlineKeyboardButton("Generate New Image", callback_data = "Generate")],
-            [InlineKeyboardButton("Edit Image", callback_data = "Edit")],
+            #[InlineKeyboardButton("Edit Image", callback_data = "Edit")],
             [InlineKeyboardButton("Create Variations", callback_data = "Variation")]
         ]
     text_markup = InlineKeyboardMarkup(text_buttons)
@@ -63,18 +63,19 @@ async def generate(bot, callback):
     try:
         await bot.send_message(callback.chat.id, message, parse_mode = ParseMode.MARKDOWN)
     except AttributeError:
-        await bot.send_message(callback.message.chat.id, message)
+        await bot.send_message(callback.message.chat.id, message, parse_mode = ParseMode.MARKDOWN)
 
 bot.add_handler(MessageHandler(generate, filters.command("generate")))
 bot.add_handler(CallbackQueryHandler(generate, filters.regex("Generate")))
 
-@bot.on_message(filters.regex(r"[a-z]{1,1000}%[1-9]0{0,1}%[0-9]{3,4}x[0-9]{3,4}", flags=re.I|re.M))
+@bot.on_message(filters.regex(r"[a-z,\"'.!& ]+%[0-9]+%[0-9]+x[0-9]+", flags=re.I|re.M))
 async def sendImages(bot, message):
     global NEXT
     if NEXT:
         chat_id = message.chat.id
         request = await formatDescription(message.text)
         try:
+            await bot.send_message(chat_id, "Getting images 🧭")
             responses = await generateImageUrls(
                 request["description"],
                 request["n"],
@@ -83,10 +84,9 @@ async def sendImages(bot, message):
         except InvalidRequestError:
             await bot.send_message(chat_id, "⚠ You used the wrong syntax. Try again but make sure it's in this format. '`<description>%<number of images to generate>%<size>`' and don't forget the rules\n\n> The description can be up to 1000 characters long._\n> You can only generate up to 10 images.\n> There are three acceptable options for the image size: 256x256, 512x512, and 1024x1024.\nYou're welcome by the way😉", parse_mode = ParseMode.MARKDOWN)
         else:
-            await bot.send_message(chat_id, "Getting images 🧭")
             for response in responses:
                 await bot.send_photo(chat_id, response['url'])
-            await bot.send_message(chat_id, "☕")
+            await bot.send_message(chat_id, "Here are the images you asked for.")
             NEXT = False
 
 print("Holla, I'm online")
