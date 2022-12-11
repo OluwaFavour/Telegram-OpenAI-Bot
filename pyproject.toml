@@ -13,6 +13,8 @@ urllib3 = "^1.26.12"
 Pyrogram = "^2.0.69"
 TgCrypto = "^1.2.5"
 openai = "^0.25.0"
+Pillow = "^9.3.0"
+uvloop = "^0.17.0"
 
 [tool.poetry.dev-dependencies]
 debugpy = "^1.6.2"
